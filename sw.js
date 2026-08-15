@@ -1,5 +1,5 @@
 const CACHE = 'tareas-antenucci-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json', '/tareas-icon-192.png', '/tareas-icon-512.png'];
+const ASSETS = ['/tareas/', '/tareas/index.html', '/tareas/manifest.json', '/tareas/tareas-icon-192.png', '/tareas/tareas-icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));

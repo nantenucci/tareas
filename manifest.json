@@ -1,7 +1,8 @@
 {
   "name": "Tareas — Antenucci Penal",
   "short_name": "Tareas",
-  "start_url": "/",
+  "start_url": "/tareas/",
+  "scope": "/tareas/",
   "display": "standalone",
   "background_color": "#F4F4F2",
   "theme_color": "#1B3A6B",
