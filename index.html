@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es" translate="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Tareas — Antenucci Penal</title>
+<link rel="icon" type="image/png" href="tareas-icon-512.png">
+<link rel="shortcut icon" type="image/png" href="tareas-icon-512.png">
+<link rel="apple-touch-icon" href="tareas-icon-192.png">
+<meta name="theme-color" content="#1B3A6B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tareas">
+<link rel="manifest" href="manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --azul:#1B3A6B; --azul2:#2E5BA8; --azul-l:#EBF1FB;
+  --gris:#F4F4F2; --gris2:#E8E8E4; --gris3:#9A9A96;
+  --negro:#111110; --blanco:#FAFAF8; --borde:#D8D8D4;
+  --rojo:#B3382C; --rojo-l:#FBEAE8;
+  --naranja:#C97A1E; --naranja-l:#FBF0DF;
+  --verde:#3D7A4E;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif;
+}
+html,body{min-height:100%;background:var(--gris);font-family:var(--sans);color:var(--negro);font-size:14px}
+body{translate:no}
+
+.topbar{background:var(--azul);display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:2px solid var(--azul2);position:sticky;top:0;z-index:10}
+.logo-cuervo{width:30px;height:30px;flex-shrink:0}
+.topbar-brand{display:flex;flex-direction:column;line-height:1.15}
+.topbar-brand b{font-family:var(--mono);font-size:15px;font-weight:600;color:#fff;letter-spacing:.02em}
+.topbar-brand span{font-size:11px;color:#8FB0DD}
+
+.main{max-width:640px;margin:0 auto;padding:20px 16px 60px}
+
+.card{background:#fff;border:1px solid var(--borde);border-radius:10px;padding:16px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.entrada textarea{width:100%;border:1px solid var(--borde);border-radius:7px;padding:11px 12px;font-family:var(--sans);font-size:14.5px;color:var(--negro);resize:vertical;min-height:64px;line-height:1.5}
+.entrada textarea:focus{outline:none;border-color:var(--azul2);box-shadow:0 0 0 2px var(--azul-l)}
+.entrada-acciones{display:flex;gap:8px;margin-top:10px}
+.btn{font-family:var(--sans);font-size:13.5px;font-weight:600;border-radius:7px;padding:9px 16px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px}
+.btn-guardar{background:var(--azul);color:#fff;flex:1;justify-content:center}
+.btn-guardar:hover{background:var(--azul2)}
+.btn-guardar:disabled{opacity:.55;cursor:default}
+.btn-mic{background:var(--gris);color:var(--azul);border:1px solid var(--borde);flex-shrink:0;width:42px;justify-content:center;font-size:16px}
+.btn-mic.grabando{background:var(--rojo);color:#fff;border-color:var(--rojo)}
+.hint{font-size:11.5px;color:var(--gris3);margin-top:8px}
+
+.seccion{margin-bottom:18px}
+.seccion-titulo{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--gris3);margin-bottom:8px;padding-left:2px}
+.seccion.vencidas .seccion-titulo{color:var(--rojo)}
+.seccion.hoy .seccion-titulo{color:var(--naranja)}
+
+.tarea{background:#fff;border:1px solid var(--borde);border-radius:8px;padding:12px 14px;margin-bottom:7px;display:flex;align-items:flex-start;gap:11px}
+.seccion.vencidas .tarea{border-left:3px solid var(--rojo)}
+.seccion.hoy .tarea{border-left:3px solid var(--naranja)}
+.chk{width:20px;height:20px;border-radius:50%;border:2px solid var(--borde);flex-shrink:0;cursor:pointer;margin-top:1px;display:flex;align-items:center;justify-content:center;background:#fff;font-size:12px;color:transparent}
+.chk:hover{border-color:var(--azul2)}
+.tarea-body{flex:1;min-width:0}
+.tarea-titulo{font-size:14px;font-weight:500;color:var(--negro);line-height:1.4}
+.tarea-desc{font-size:12.5px;color:#555;margin-top:2px;line-height:1.4}
+.tarea-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.tarea-fecha{font-family:var(--mono);font-size:11px;color:var(--gris3);background:var(--gris);border-radius:4px;padding:2px 7px}
+.seccion.vencidas .tarea-fecha{background:var(--rojo-l);color:var(--rojo)}
+.seccion.hoy .tarea-fecha{background:var(--naranja-l);color:var(--naranja)}
+.tarea-causa{font-size:11px;color:var(--azul2);background:var(--azul-l);border-radius:4px;padding:2px 7px}
+
+.vacio{text-align:center;padding:50px 20px;color:var(--gris3);font-size:13px}
+.vacio b{display:block;font-size:15px;color:var(--azul);margin-bottom:6px;font-family:var(--mono)}
+.cargando{text-align:center;padding:30px;color:var(--gris3);font-size:12.5px}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--negro);color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:50;max-width:90vw;text-align:center}
+.toast.mostrar{opacity:1;transform:translateX(-50%) translateY(-4px)}
+.toast.error{background:var(--rojo)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo-cuervo">
+    <svg width="30" height="30" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+      <g transform="translate(0,512) scale(0.1,-0.1)" fill="white" stroke="none">
+        <path d="M1903 4550 c-111 -37 -229 -149 -254 -243 -30 -114 -92 -291 -155
+-443 -14 -34 -25 -70 -23 -80 1 -10 0 -26 -3 -34 -3 -8 -13 -41 -22 -73 -13
+-44 -29 -69 -64 -103 -150 -145 -164 -162 -206 -244 l-44 -85 -5 -190 c-3
+-139 -1 -213 10 -275 17 -97 72 -249 109 -297 29 -38 102 -79 115 -66 5 5 10
+35 11 66 1 31 5 57 9 57 17 0 203 -180 233 -225 66 -100 105 -172 131 -240 24
+-65 88 -213 121 -278 22 -44 43 -150 48 -235 2 -46 11 -92 22 -115 l18 -37
+-32 -61 c-18 -33 -32 -65 -32 -71 0 -14 -90 -172 -160 -278 -30 -47 -68 -111
+-83 -141 -16 -30 -41 -70 -57 -89 -27 -33 -29 -34 -115 -36 -73 -3 -91 -7
+-107 -24 -10 -11 -22 -20 -25 -20 -4 0 -2 5 5 12 22 22 12 28 -52 28 -54 0
+-70 -4 -93 -24 -34 -29 -25 -42 18 -27 43 15 59 14 59 -4 0 -24 47 -42 71 -27
+17 11 21 9 28 -12 13 -33 55 -42 90 -17 35 25 144 39 166 21 27 -23 147 5 195
+45 30 25 52 34 97 40 104 12 105 12 101 58 -1 26 2 42 10 45 15 5 64 -37 57
+-49 -9 -13 15 -21 29 -9 20 16 9 46 -31 80 -41 37 -69 38 -133 5 -67 -34 -124
+-34 -146 0 -15 22 -15 32 -4 68 18 60 104 234 142 288 54 77 119 162 143 189
+22 24 49 101 66 185 6 33 1 59 -27 144 -19 57 -34 116 -34 130 0 14 -4 40 -8
+56 -12 40 -5 57 16 45 31 -16 146 -49 182 -51 59 -3 70 0 70 21 0 19 5 20 52
+15 29 -2 64 -13 77 -23 34 -25 91 -140 167 -339 66 -171 112 -250 140 -239 22
+8 44 -4 44 -24 0 -14 9 -20 33 -22 30 -3 32 -6 39 -53 13 -98 8 -318 -7 -345
+-8 -14 -14 -42 -15 -62 0 -48 -18 -57 -101 -55 -75 2 -109 -14 -129 -63 -16
+-39 -6 -50 22 -22 l22 21 11 -22 c7 -13 20 -22 33 -21 16 0 21 -4 17 -14 -4
+-10 0 -13 14 -9 13 3 21 -1 24 -14 7 -26 27 -24 105 8 61 26 76 28 171 25 99
+-3 106 -2 122 20 17 21 18 22 37 5 10 -9 21 -17 24 -17 13 0 -5 40 -28 61 -20
+19 -36 23 -94 23 -77 1 -109 19 -95 53 15 35 14 48 -8 71 -18 19 -19 25 -7 32
+12 7 12 12 -3 27 -9 11 -16 32 -16 49 0 16 -2 45 -5 64 -2 19 -8 94 -12 167
+-7 129 -7 132 13 127 16 -5 25 3 42 38 11 25 21 57 21 72 0 26 3 25 73 -37
+124 -108 261 -161 378 -148 72 9 90 24 96 85 3 25 7 46 10 46 2 0 29 -13 61
+-29 75 -37 198 -57 250 -40 52 16 62 27 62 64 0 54 -103 195 -274 374 -34 35
+-52 61 -41 57 52 -19 167 -45 179 -40 15 6 28 56 20 78 -6 14 -131 123 -217
+188 -27 20 -83 51 -124 68 -89 37 -173 90 -201 125 -11 14 -27 25 -36 25 -8 0
+-23 12 -33 28 -9 15 -25 35 -35 45 -15 15 -16 21 -5 37 6 11 15 20 19 20 17 0
+6 59 -28 155 -64 182 -83 249 -93 339 -12 98 -46 187 -81 208 -12 7 -33 37
+-46 67 -19 42 -27 52 -41 46 -14 -5 -41 18 -113 92 -170 175 -353 343 -375
+343 -4 0 -31 17 -59 38 -28 21 -68 48 -88 61 -21 12 -38 29 -38 36 0 13 66 65
+82 65 4 0 32 16 62 35 30 19 101 57 157 85 l104 50 131 0 c184 0 206 12 108
+57 -85 39 -217 72 -339 85 -60 6 -112 13 -114 15 -3 2 6 14 19 28 43 46 146
+70 300 70 74 0 156 -4 183 -8 57 -10 60 0 13 46 -40 41 -156 91 -246 107 -36
+6 -85 18 -110 26 -25 7 -81 18 -125 23 -45 4 -98 17 -120 29 -81 40 -146 54
+-290 58 -121 4 -148 1 -202 -16z"/>
+      </g>
+    </svg>
+  </div>
+  <div class="topbar-brand">
+    <b>TAREAS</b>
+    <span>Antenucci Penal</span>
+  </div>
+</div>
+
+<div class="main">
+  <div class="card">
+    <div class="entrada">
+      <textarea id="txtEntrada" placeholder="Escribí o dictá una tarea… ej: presentar escrito en causa Pérez el viernes a las 10"></textarea>
+      <div class="entrada-acciones">
+        <button class="btn btn-mic" id="btnMic" title="Dictar por voz">&#127908;</button>
+        <button class="btn btn-guardar" id="btnGuardar">Guardar</button>
+      </div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </div>
+
+  <div id="lista">
+    <div class="cargando">Cargando…</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://dzbbswphrqgmdndtvxzx.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_wTeNC3UmYjHsuTQ9LfCWkg_KJDz3C3B';
+const WORKER_URL = 'https://nestor-asistente-tareas.nantenucci.workers.dev/api/interpretar';
+
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const txtEntrada = document.getElementById('txtEntrada');
+const btnGuardar = document.getElementById('btnGuardar');
+const btnMic = document.getElementById('btnMic');
+const lista = document.getElementById('lista');
+const toastEl = document.getElementById('toast');
+const hint = document.getElementById('hint');
+
+function toast(msg, esError) {
+  toastEl.textContent = msg;
+  toastEl.className = 'toast mostrar' + (esError ? ' error' : '');
+  setTimeout(() => { toastEl.className = 'toast'; }, 3200);
+}
+
+function escapeHtml(s) {
+  return (s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function hoyART() {
+  const d = new Date(Date.now() - 3 * 60 * 60 * 1000);
+  return d.toISOString().slice(0, 10);
+}
+
+async function guardarTarea() {
+  const texto = txtEntrada.value.trim();
+  if (!texto) return;
+  btnGuardar.disabled = true;
+  btnGuardar.textContent = 'Guardando…';
+  try {
+    const resp = await fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texto }),
+    });
+    const parsed = await resp.json();
+    if (!resp.ok || parsed.error) throw new Error(parsed.error || 'No se pudo interpretar el texto');
+
+    const { error } = await db.from('tareas').insert({
+      texto_original: texto,
+      titulo: parsed.titulo,
+      descripcion: parsed.descripcion,
+      fecha_vencimiento: parsed.fecha_vencimiento,
+      hora_vencimiento: parsed.hora_vencimiento,
+      causa_id: parsed.causa_id,
+    });
+    if (error) throw error;
+
+    txtEntrada.value = '';
+    toast('Tarea guardada &#9989;'.replace('&#9989;', '✅'));
+    cargarTareas();
+  } catch (e) {
+    console.error(e);
+    toast('Error al guardar: ' + (e.message || e), true);
+  } finally {
+    btnGuardar.disabled = false;
+    btnGuardar.textContent = 'Guardar';
+  }
+}
+
+async function marcarHecho(id, elChk) {
+  elChk.textContent = '⋯';
+  const { error } = await db.from('tareas').update({ estado: 'hecho' }).eq('id', id);
+  if (error) {
+    toast('No se pudo marcar como hecho', true);
+    elChk.textContent = '';
+    return;
+  }
+  cargarTareas();
+}
+
+async function cargarTareas() {
+  const { data, error } = await db
+    .from('tareas')
+    .select('id,titulo,descripcion,fecha_vencimiento,hora_vencimiento,causa_id')
+    .eq('estado', 'pendiente')
+    .order('fecha_vencimiento', { ascending: true, nullsFirst: false });
+
+  if (error) {
+    lista.innerHTML = '<div class="vacio">No se pudo cargar la lista.</div>';
+    console.error(error);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    lista.innerHTML = '<div class="vacio"><b>Sin pendientes</b>Todo al día. 🎉</div>';
+    return;
+  }
+
+  const causaIds = [...new Set(data.filter(t => t.causa_id).map(t => t.causa_id))];
+  let causas = {};
+  if (causaIds.length) {
+    const { data: cRows } = await db.from('causas').select('id,imputado,caratula').in('id', causaIds);
+    (cRows || []).forEach(c => { causas[c.id] = c.imputado || c.caratula || ''; });
+  }
+
+  const hoy = hoyART();
+  const grupos = { vencidas: [], hoy: [], proximas: [], sinfecha: [] };
+  data.forEach(t => {
+    if (!t.fecha_vencimiento) grupos.sinfecha.push(t);
+    else if (t.fecha_vencimiento < hoy) grupos.vencidas.push(t);
+    else if (t.fecha_vencimiento === hoy) grupos.hoy.push(t);
+    else grupos.proximas.push(t);
+  });
+
+  const nombres = { vencidas: 'Vencidas', hoy: 'Hoy', proximas: 'Próximas', sinfecha: 'Sin fecha' };
+  let html = '';
+  for (const key of ['vencidas', 'hoy', 'proximas', 'sinfecha']) {
+    const items = grupos[key];
+    if (!items.length) continue;
+    html += `<div class="seccion ${key}"><div class="seccion-titulo">${nombres[key]} (${items.length})</div>`;
+    items.forEach(t => {
+      let metaFecha = '';
+      if (t.fecha_vencimiento) {
+        metaFecha = `<span class="tarea-fecha">${t.fecha_vencimiento}${t.hora_vencimiento ? ' ' + t.hora_vencimiento.slice(0,5) : ''}</span>`;
+      }
+      const metaCausa = t.causa_id && causas[t.causa_id] ? `<span class="tarea-causa">${escapeHtml(causas[t.causa_id])}</span>` : '';
+      html += `
+        <div class="tarea">
+          <div class="chk" onclick="marcarHecho('${t.id}', this)"></div>
+          <div class="tarea-body">
+            <div class="tarea-titulo">${escapeHtml(t.titulo)}</div>
+            ${t.descripcion ? `<div class="tarea-desc">${escapeHtml(t.descripcion)}</div>` : ''}
+            ${metaFecha || metaCausa ? `<div class="tarea-meta">${metaFecha}${metaCausa}</div>` : ''}
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  }
+  lista.innerHTML = html;
+}
+
+btnGuardar.addEventListener('click', guardarTarea);
+txtEntrada.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) guardarTarea();
+});
+
+// Dictado por voz
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition) {
+  const rec = new SpeechRecognition();
+  rec.lang = 'es-AR';
+  rec.interimResults = false;
+  let grabando = false;
+
+  btnMic.addEventListener('click', () => {
+    if (grabando) { rec.stop(); return; }
+    rec.start();
+  });
+  rec.addEventListener('start', () => {
+    grabando = true;
+    btnMic.classList.add('grabando');
+    hint.textContent = 'Escuchando…';
+  });
+  rec.addEventListener('end', () => {
+    grabando = false;
+    btnMic.classList.remove('grabando');
+    hint.textContent = '';
+  });
+  rec.addEventListener('result', (e) => {
+    const transcript = e.results[0][0].transcript;
+    txtEntrada.value = (txtEntrada.value.trim() + ' ' + transcript).trim();
+  });
+  rec.addEventListener('error', (e) => {
+    if (e.error !== 'no-speech' && e.error !== 'aborted') toast('No se pudo grabar audio', true);
+  });
+} else {
+  btnMic.disabled = true;
+  btnMic.title = 'Dictado por voz no disponible en este navegador';
+  btnMic.style.opacity = '.4';
+}
+
+cargarTareas();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
