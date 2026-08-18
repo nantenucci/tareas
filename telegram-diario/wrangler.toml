@@ -1,0 +1,10 @@
+name = "tareas-resumen-diario"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+[triggers]
+crons = ["0 10 * * *"]
+
+[vars]
+SUPABASE_URL = "https://dzbbswphrqgmdndtvxzx.supabase.co"
+SUPABASE_KEY = "sb_publishable_wTeNC3UmYjHsuTQ9LfCWkg_KJDz3C3B"
