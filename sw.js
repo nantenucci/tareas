@@ -1,4 +1,4 @@
-const CACHE = 'tareas-antenucci-v1';
+const CACHE = 'tareas-antenucci-v2';
 const ASSETS = ['/tareas/', '/tareas/index.html', '/tareas/manifest.json', '/tareas/tareas-icon-192.png', '/tareas/tareas-icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -13,9 +13,17 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
+// Red primero: así una actualización de la app se ve de inmediato.
+// Si no hay conexión, sirve la última versión guardada en caché.
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request))
+    fetch(e.request)
+      .then((res) => {
+        const copia = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copia));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
