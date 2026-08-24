@@ -66,6 +66,23 @@ body{translate:no}
 .seccion.hoy .tarea-fecha{background:var(--naranja-l);color:var(--naranja)}
 .tarea-causa{font-size:11px;color:var(--azul2);background:var(--azul-l);border-radius:4px;padding:2px 7px}
 
+.btn-editar{background:none;border:none;color:var(--gris3);cursor:pointer;font-size:14px;padding:2px 4px;border-radius:4px;flex-shrink:0;align-self:flex-start}
+.btn-editar:hover{background:var(--gris);color:var(--azul2)}
+
+.form-editar{display:flex;flex-direction:column;gap:8px;width:100%}
+.form-editar input[type=text],.form-editar textarea{width:100%;border:1px solid var(--borde);border-radius:6px;padding:8px 10px;font-family:var(--sans);font-size:13.5px;color:var(--negro)}
+.form-editar textarea{resize:vertical;min-height:44px;line-height:1.4}
+.form-editar input:focus,.form-editar textarea:focus{outline:none;border-color:var(--azul2);box-shadow:0 0 0 2px var(--azul-l)}
+.ed-fila{display:flex;gap:8px}
+.ed-fila input{flex:1;border:1px solid var(--borde);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:12.5px;color:var(--negro)}
+.ed-causa-hint{font-size:11px;color:var(--gris3);min-height:14px}
+.ed-acciones{display:flex;gap:8px}
+.ed-acciones .btn{padding:7px 14px;font-size:12.5px}
+.btn-guardar-ed{background:var(--azul);color:#fff}
+.btn-guardar-ed:hover{background:var(--azul2)}
+.btn-guardar-ed:disabled{opacity:.55}
+.btn-cancelar-ed{background:var(--gris);color:var(--negro);border:1px solid var(--borde)}
+
 .vacio{text-align:center;padding:50px 20px;color:var(--gris3);font-size:13px}
 .vacio b{display:block;font-size:15px;color:var(--azul);margin-bottom:6px;font-family:var(--mono)}
 .cargando{text-align:center;padding:30px;color:var(--gris3);font-size:12.5px}
@@ -151,6 +168,10 @@ body{translate:no}
 const SUPABASE_URL = 'https://dzbbswphrqgmdndtvxzx.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_wTeNC3UmYjHsuTQ9LfCWkg_KJDz3C3B';
 const WORKER_URL = 'https://nestor-asistente-tareas.nantenucci.workers.dev/api/interpretar';
+const BUSCAR_CAUSA_URL = 'https://nestor-asistente-tareas.nantenucci.workers.dev/api/buscar-causa';
+
+let tareasActuales = {};
+let causasActuales = {};
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -224,6 +245,90 @@ async function marcarHecho(id, elChk) {
   cargarTareas();
 }
 
+function editarTarea(id) {
+  const t = tareasActuales[id];
+  const cont = document.getElementById('tarea-' + id);
+  if (!t || !cont) return;
+
+  const causaNombre = t.causa_id && causasActuales[t.causa_id] ? causasActuales[t.causa_id] : '';
+
+  cont.innerHTML = `
+    <div class="form-editar">
+      <input type="text" class="ed-titulo" placeholder="Título" value="${escapeHtml(t.titulo || '')}">
+      <textarea class="ed-desc" placeholder="Descripción (opcional)">${escapeHtml(t.descripcion || '')}</textarea>
+      <div class="ed-fila">
+        <input type="date" class="ed-fecha" value="${t.fecha_vencimiento || ''}">
+        <input type="time" class="ed-hora" value="${t.hora_vencimiento ? t.hora_vencimiento.slice(0, 5) : ''}">
+      </div>
+      <input type="text" class="ed-causa" placeholder="Causa (imputado o carátula)" value="${escapeHtml(causaNombre)}">
+      <div class="ed-causa-hint"></div>
+      <div class="ed-acciones">
+        <button class="btn btn-guardar-ed" onclick="guardarEdicion('${id}')">Guardar</button>
+        <button class="btn btn-cancelar-ed" onclick="cargarTareas()">Cancelar</button>
+      </div>
+    </div>`;
+
+  const inputCausa = cont.querySelector('.ed-causa');
+  const hintCausa = cont.querySelector('.ed-causa-hint');
+  inputCausa.dataset.causaId = t.causa_id || '';
+  if (causaNombre) hintCausa.textContent = '🔗 ' + causaNombre;
+
+  let debounceTimer;
+  inputCausa.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    const valor = inputCausa.value.trim();
+    inputCausa.dataset.causaId = '';
+    if (!valor) { hintCausa.textContent = ''; return; }
+    hintCausa.textContent = 'Buscando…';
+    debounceTimer = setTimeout(async () => {
+      try {
+        const resp = await fetch(`${BUSCAR_CAUSA_URL}?q=${encodeURIComponent(valor)}`);
+        const resData = await resp.json();
+        if (resData.causa) {
+          inputCausa.dataset.causaId = resData.causa.id;
+          hintCausa.textContent = '🔗 ' + (resData.causa.imputado || resData.causa.caratula || '');
+        } else {
+          hintCausa.textContent = 'Sin causa vinculada';
+        }
+      } catch (e) {
+        hintCausa.textContent = '';
+      }
+    }, 500);
+  });
+}
+
+async function guardarEdicion(id) {
+  const cont = document.getElementById('tarea-' + id);
+  if (!cont) return;
+
+  const titulo = cont.querySelector('.ed-titulo').value.trim();
+  if (!titulo) { toast('El título no puede quedar vacío', true); return; }
+  const descripcion = cont.querySelector('.ed-desc').value.trim() || null;
+  const fecha_vencimiento = cont.querySelector('.ed-fecha').value || null;
+  const hora_vencimiento = cont.querySelector('.ed-hora').value || null;
+  const inputCausa = cont.querySelector('.ed-causa');
+  const causa_id = inputCausa.value.trim() ? (inputCausa.dataset.causaId || null) : null;
+
+  const btnG = cont.querySelector('.btn-guardar-ed');
+  btnG.disabled = true;
+  btnG.textContent = 'Guardando…';
+
+  const { error } = await db
+    .from('tareas')
+    .update({ titulo, descripcion, fecha_vencimiento, hora_vencimiento, causa_id })
+    .eq('id', id);
+
+  if (error) {
+    toast('No se pudo guardar: ' + error.message, true);
+    btnG.disabled = false;
+    btnG.textContent = 'Guardar';
+    return;
+  }
+
+  toast('Tarea actualizada ✅');
+  cargarTareas();
+}
+
 async function cargarTareas() {
   const { data, error } = await db
     .from('tareas')
@@ -242,12 +347,16 @@ async function cargarTareas() {
     return;
   }
 
+  tareasActuales = {};
+  data.forEach(t => { tareasActuales[t.id] = t; });
+
   const causaIds = [...new Set(data.filter(t => t.causa_id).map(t => t.causa_id))];
   let causas = {};
   if (causaIds.length) {
     const { data: cRows } = await db.from('causas').select('id,imputado,caratula').in('id', causaIds);
     (cRows || []).forEach(c => { causas[c.id] = c.imputado || c.caratula || ''; });
   }
+  causasActuales = causas;
 
   const hoy = hoyART();
   const grupos = { vencidas: [], hoy: [], proximas: [], sinfecha: [] };
@@ -271,13 +380,14 @@ async function cargarTareas() {
       }
       const metaCausa = t.causa_id && causas[t.causa_id] ? `<span class="tarea-causa">${escapeHtml(causas[t.causa_id])}</span>` : '';
       html += `
-        <div class="tarea">
+        <div class="tarea" id="tarea-${t.id}">
           <div class="chk" onclick="marcarHecho('${t.id}', this)"></div>
           <div class="tarea-body">
             <div class="tarea-titulo">${escapeHtml(t.titulo)}</div>
             ${t.descripcion ? `<div class="tarea-desc">${escapeHtml(t.descripcion)}</div>` : ''}
             ${metaFecha || metaCausa ? `<div class="tarea-meta">${metaFecha}${metaCausa}</div>` : ''}
           </div>
+          <button class="btn-editar" onclick="editarTarea('${t.id}')" title="Editar">&#9998;</button>
         </div>`;
     });
     html += `</div>`;
