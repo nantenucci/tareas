@@ -29,9 +29,13 @@ body{translate:no}
 
 .topbar{background:var(--azul);display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:2px solid var(--azul2);position:sticky;top:0;z-index:10}
 .logo-cuervo{width:30px;height:30px;flex-shrink:0}
-.topbar-brand{display:flex;flex-direction:column;line-height:1.15}
+.topbar-brand{display:flex;flex-direction:column;line-height:1.15;flex:1}
 .topbar-brand b{font-family:var(--mono);font-size:15px;font-weight:600;color:#fff;letter-spacing:.02em}
 .topbar-brand span{font-size:11px;color:#8FB0DD}
+.topbar-nav{display:flex;gap:6px}
+.topbar-nav a{font-family:var(--mono);font-size:11.5px;color:#C7D8F0;text-decoration:none;padding:6px 10px;border-radius:6px;border:1px solid transparent}
+.topbar-nav a:hover{background:rgba(255,255,255,.08)}
+.topbar-nav a.activo{color:#fff;border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.08)}
 
 .main{max-width:640px;margin:0 auto;padding:20px 16px 60px}
 
@@ -141,6 +145,10 @@ body{translate:no}
   <div class="topbar-brand">
     <b>TAREAS</b>
     <span>Antenucci Penal</span>
+  </div>
+  <div class="topbar-nav">
+    <a href="index.html" class="activo">Tareas</a>
+    <a href="recibos.html">Recibos</a>
   </div>
 </div>
 
