@@ -93,29 +93,37 @@ body{translate:no}
 .btn-imprimir{background:var(--azul);color:#fff}
 .btn-anular{background:var(--rojo-l);color:var(--rojo)}
 
-.hoja{background:#fff;width:100%;max-width:720px;padding:52px 56px;font-family:var(--serif);color:#1a1a18;box-shadow:0 6px 24px rgba(0,0,0,.25)}
-.hoja-header{text-align:center;margin-bottom:14px}
-.hoja-header .nombre{font-size:22px;font-weight:600;letter-spacing:.04em}
-.hoja-header .subtitulo{font-style:italic;font-size:14px;margin-top:2px}
-.hoja-header .direccion{font-size:12.5px;margin-top:6px;line-height:1.5}
-.hoja-hr{border:none;border-top:1.5px solid #1a1a18;margin:14px 0 22px}
-.hoja-titulo{text-align:center;font-size:19px;font-weight:600;letter-spacing:.08em;margin-bottom:26px}
-.hoja-fecha{margin-bottom:20px;font-size:15px}
-.hoja-cuerpo{font-size:15.5px;line-height:1.85;text-align:justify;white-space:pre-wrap}
-.hoja-cuerpo p{margin-bottom:16px}
-.hoja-firma{margin-top:70px;text-align:center;font-size:14px}
-.hoja-firma .linea{border-top:1px solid #1a1a18;width:250px;margin:0 auto 6px}
-.hoja-firma b{display:block;font-size:14.5px}
-.hoja-numero{font-family:var(--mono);font-size:10.5px;color:#999;text-align:right;margin-bottom:6px}
-.hoja-anulado-marca{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);font-size:64px;font-weight:700;color:rgba(179,56,44,.28);border:6px solid rgba(179,56,44,.28);padding:6px 24px;border-radius:8px;pointer-events:none;letter-spacing:.1em}
+.hoja{background:#fff;width:100%;max-width:720px;font-family:var(--serif);color:#1a1a18;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.copia{position:relative;padding:26px 46px 20px}
+.copia-etiqueta{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:#999;text-align:right}
+.hoja-header{text-align:center;margin-bottom:10px}
+.hoja-header .nombre{font-size:19px;font-weight:600;letter-spacing:.04em}
+.hoja-header .subtitulo{font-style:italic;font-size:12.5px;margin-top:2px}
+.hoja-header .direccion{font-size:11px;margin-top:4px;line-height:1.45}
+.hoja-hr{border:none;border-top:1.5px solid #1a1a18;margin:10px 0 16px}
+.hoja-titulo{text-align:center;font-size:16px;font-weight:600;letter-spacing:.08em;margin-bottom:16px}
+.hoja-fecha{margin-bottom:14px;font-size:13.5px}
+.hoja-cuerpo{font-size:13.5px;line-height:1.65;text-align:justify;white-space:pre-wrap}
+.hoja-cuerpo p{margin-bottom:10px}
+.hoja-firma{margin-top:26px;text-align:center;font-size:12.5px}
+.hoja-firma .linea{border-top:1px solid #1a1a18;width:210px;margin:0 auto 5px}
+.hoja-firma b{display:block;font-size:13px}
+.hoja-numero{font-family:var(--mono);font-size:10px;color:#999;text-align:right;margin-bottom:4px}
+.hoja-anulado-marca{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-18deg);font-size:38px;font-weight:700;color:rgba(179,56,44,.3);border:4px solid rgba(179,56,44,.3);padding:4px 16px;border-radius:8px;pointer-events:none;letter-spacing:.1em}
 .hoja-wrap{position:relative}
 
+.linea-corte{display:flex;align-items:center;gap:8px;padding:0 22px;color:#999}
+.linea-corte::before,.linea-corte::after{content:'';flex:1;border-top:1.5px dashed #aaa}
+.linea-corte span{white-space:nowrap;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em}
+
 @media print{
+  @page{margin:9mm}
   body *{visibility:hidden}
   .hoja-imprimible,.hoja-imprimible *{visibility:visible}
-  .hoja-imprimible{position:absolute;top:0;left:0;width:100%;box-shadow:none;padding:20px 40px}
+  .hoja-imprimible{position:absolute;top:0;left:0;width:100%;box-shadow:none}
   .modal-acciones{display:none}
   .modal-fondo{position:absolute;background:none;padding:0;display:block;overflow:visible}
+  .copia{page-break-inside:avoid}
 }
 </style>
 </head>
@@ -251,26 +259,7 @@ body{translate:no}
       <button class="btn btn-imprimir" id="btnImprimir">Imprimir / PDF</button>
     </div>
     <div class="hoja-wrap">
-      <div class="hoja hoja-imprimible" id="hojaRecibo">
-        <div class="hoja-numero" id="hNumero"></div>
-        <div class="hoja-header">
-          <div class="nombre">DR. NÉSTOR ANTENUCCI</div>
-          <div class="subtitulo">Abogado — Derecho Penal</div>
-          <div class="direccion">
-            Virasoro 1164, Rosario, Santa Fe<br>
-            T°XLVIII F°118 C.A.R. (ColAbRo)
-          </div>
-        </div>
-        <hr class="hoja-hr">
-        <div class="hoja-titulo">RECIBO</div>
-        <div class="hoja-fecha" id="hFecha"></div>
-        <div class="hoja-cuerpo" id="hCuerpo"></div>
-        <div class="hoja-firma">
-          <div class="linea"></div>
-          <b>Dr. Néstor Antenucci</b>
-          Abogado — T°XLVIII F°118 C.A.R.
-        </div>
-      </div>
+      <div class="hoja hoja-imprimible" id="hojaRecibo"></div>
     </div>
   </div>
 </div>
@@ -372,6 +361,17 @@ function fechaLarga(fechaISO) {
   return `Rosario, Santa Fe, ${d} de ${MESES[m - 1]} de ${y}.`;
 }
 
+// Normaliza nombres propios a "Mayúscula Inicial" (p. ej. "juan carlos perez" -> "Juan Carlos Pérez"),
+// sin tocar acentos, y dejando en minúscula los conectores ("de", "del", "la"...).
+const CONECTORES_NOMBRE = ['de', 'del', 'la', 'las', 'los', 'y'];
+function capitalizarNombre(s) {
+  return (s || '').trim().replace(/\s+/g, ' ').split(' ').map((palabra, i) => {
+    const low = palabra.toLocaleLowerCase('es');
+    if (i > 0 && CONECTORES_NOMBRE.includes(low)) return low;
+    return low.charAt(0).toLocaleUpperCase('es') + low.slice(1);
+  }).join(' ');
+}
+
 /* ---------- Composición del texto del recibo ---------- */
 const CONCEPTO_TEXTO = {
   anticipo: 'anticipo a cuenta de honorarios profesionales',
@@ -389,11 +389,11 @@ const CIERRE_TEXTO = {
 };
 
 function componerCuerpo() {
-  const nombre = $('fPagadorNombre').value.trim() || '[NOMBRE DEL PAGADOR]';
+  const nombre = capitalizarNombre($('fPagadorNombre').value) || '[NOMBRE DEL PAGADOR]';
   const dni = $('fPagadorDni').value.trim();
   const monto = parseFloat($('fMonto').value) || 0;
   const conceptoTipo = $('fConcepto').value;
-  const patrocinado = $('fPatrocinado').value.trim();
+  const patrocinado = capitalizarNombre($('fPatrocinado').value);
 
   let texto = `Recibí del Sr./Sra. ${nombre}${dni ? ', D.N.I. N° ' + dni : ''}, la suma de ${montoEnLetras(monto)} (${formatearMonto(monto)}), en concepto de ${CONCEPTO_TEXTO[conceptoTipo]}`;
 
@@ -433,6 +433,15 @@ function recomponer() {
 });
 $('fConcepto').addEventListener('change', () => { cierreTocadoManualmente = false; recomponer(); });
 
+// Al salir del campo, prolija el nombre a "Mayúscula Inicial" (no mientras se tipea, para no pelear con el cursor).
+['fPagadorNombre','fPatrocinado'].forEach(id => {
+  $(id).addEventListener('blur', () => {
+    const el = $(id);
+    if (el.value.trim()) el.value = capitalizarNombre(el.value);
+    recomponer();
+  });
+});
+
 /* ---------- Autocompletar causa (consulta directa a Supabase) ---------- */
 let debounceCausa;
 $('fCausa').addEventListener('input', () => {
@@ -465,7 +474,7 @@ $('fCausa').addEventListener('input', () => {
 $('formRecibo').addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = $('btnGuardar');
-  const nombre = $('fPagadorNombre').value.trim();
+  const nombre = capitalizarNombre($('fPagadorNombre').value);
   const monto = parseFloat($('fMonto').value);
   if (!nombre || !monto) { toast('Completá pagador y monto', true); return; }
 
@@ -510,20 +519,40 @@ function resetForm() {
   $('fCierre').value = '';
 }
 
-/* ---------- Modal / hoja imprimible ---------- */
-function abrirModal(recibo) {
-  $('hNumero').textContent = 'Recibo N° ' + String(recibo.numero).padStart(4, '0');
-  $('hFecha').textContent = fechaLarga(recibo.fecha);
-  $('hCuerpo').innerHTML = `<p>${escapeHtml(recibo.cuerpo_texto)}</p>` + (recibo.cierre_texto ? `<p>${escapeHtml(recibo.cierre_texto)}</p>` : '');
+/* ---------- Modal / hoja imprimible (se emite por duplicado, para cortar) ---------- */
+function renderCopia(recibo, etiqueta) {
+  const cuerpoHtml = `<p>${escapeHtml(recibo.cuerpo_texto)}</p>` + (recibo.cierre_texto ? `<p>${escapeHtml(recibo.cierre_texto)}</p>` : '');
+  const marca = recibo.anulado ? '<div class="hoja-anulado-marca">ANULADO</div>' : '';
+  return `
+    <div class="copia">
+      ${marca}
+      <div class="copia-etiqueta">Recibo N° ${String(recibo.numero).padStart(4, '0')} — ${etiqueta}</div>
+      <div class="hoja-header">
+        <div class="nombre">DR. NÉSTOR ANTENUCCI</div>
+        <div class="subtitulo">Abogado — Derecho Penal</div>
+        <div class="direccion">
+          Virasoro 1164, Rosario, Santa Fe<br>
+          T°XLVIII F°118 C.A.R. (ColAbRo)
+        </div>
+      </div>
+      <hr class="hoja-hr">
+      <div class="hoja-titulo">RECIBO</div>
+      <div class="hoja-fecha">${escapeHtml(fechaLarga(recibo.fecha))}</div>
+      <div class="hoja-cuerpo">${cuerpoHtml}</div>
+      <div class="hoja-firma">
+        <div class="linea"></div>
+        <b>Dr. Néstor Antenucci</b>
+        Abogado — T°XLVIII F°118 C.A.R.
+      </div>
+    </div>`;
+}
 
-  const hoja = $('hojaRecibo');
-  hoja.querySelector('.hoja-anulado-marca')?.remove();
-  if (recibo.anulado) {
-    const marca = document.createElement('div');
-    marca.className = 'hoja-anulado-marca';
-    marca.textContent = 'ANULADO';
-    hoja.appendChild(marca);
-  }
+function abrirModal(recibo) {
+  const lineaCorte = '<div class="linea-corte"><span>&#9986; cortar aquí</span></div>';
+  $('hojaRecibo').innerHTML =
+    renderCopia(recibo, 'ORIGINAL (cliente)') +
+    lineaCorte +
+    renderCopia(recibo, 'DUPLICADO (archivo del profesional)');
 
   $('btnAnular').textContent = recibo.anulado ? 'Reactivar' : 'Anular';
   $('btnAnular').onclick = () => toggleAnulado(recibo);
