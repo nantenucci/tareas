@@ -1,0 +1,13 @@
+{
+  "name": "Código Penal — Antenucci Penal",
+  "short_name": "Código Penal",
+  "start_url": "/tareas/codigo-penal/",
+  "scope": "/tareas/codigo-penal/",
+  "display": "standalone",
+  "background_color": "#F4F4F2",
+  "theme_color": "#1B3A6B",
+  "icons": [
+    { "src": "tareas-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "tareas-icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
